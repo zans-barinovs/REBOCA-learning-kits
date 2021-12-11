@@ -3,10 +3,19 @@ import bot_settings
 
 bot = telebot.TeleBot(bot_settings.token)
 
+
 @bot.message_handler(commands=['start'])
 def start(message):
     bot.send_message(message.chat.id, 'Hello! \n I\'m RIBOCA assistant bot.')
-    bot.send_message(message.chat.id, 'Here is what I can do.')
+    bot.send_message(message.chat.id, 'Here is what I can do.', reply_markup=generate_what_bot_can_do())
+    
+def generate_what_bot_can_do():
+    button = telebot.types.InlineKeyboardMarkup()
+    button.add(
+        telebot.types.InlineKeyboardButton("Show most popular learning kits", callback_data="most_popular_kit"),
+        telebot.types.InlineKeyboardButton("Serch learning kit", callback_data="search_kit")
+    )
+    return button
 
 
 bot.infinity_polling()
