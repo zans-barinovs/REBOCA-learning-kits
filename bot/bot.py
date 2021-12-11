@@ -3,9 +3,10 @@ import bot_settings
 
 bot = telebot.TeleBot(bot_settings.token)
 
-@bot.message_handler(commands=['main'])
-def main(message):
-    bot.send_message(message.chat.id, 'It works!')
+@bot.message_handler(commands=['start'])
+def start(message):
+    bot.send_message(message.chat.id, 'Hello! \n I\'m RIBOCA assistant bot.')
+    bot.send_message(message.chat.id, 'Here is what I can do.')
 
 
 bot.infinity_polling()
