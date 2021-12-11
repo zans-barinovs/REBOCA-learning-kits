@@ -6,17 +6,28 @@ bot = telebot.TeleBot(bot_settings.token)
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    bot.send_message(message.chat.id, 'Hello! \n I\'m RIBOCA assistant bot.')
-    bot.send_message(message.chat.id, 'Here is what I can do.', reply_markup=generate_what_bot_can_do())
-    
-def generate_what_bot_can_do():
-    button = telebot.types.InlineKeyboardMarkup()
-    button.add(
+    getting_kit_way = telebot.types.InlineKeyboardMarkup(row_width=1)
+    getting_kit_way.add(
         telebot.types.InlineKeyboardButton("Show most popular learning kits", callback_data="most_popular_kit"),
         telebot.types.InlineKeyboardButton("Serch learning kit", callback_data="search_kit")
     )
-    return button
+    
+    bot.send_message(message.chat.id, 'Hello! \nI\'m RIBOCA assistant bot.')
+    bot.send_message(message.chat.id, 'Here is what I can do.', reply_markup=getting_kit_way)   
+    
+def FunctionName(args):
+    
 
+@bot.callback_query_handler(func=lambda data: True)
+def buttons_callbacks(data):
+    if data.data == 'most_popular_kit':
+        bot.send_message(data.message.chat.id, 'Choose one for you')
+    elif data.data == "search_kit":
+        bot.send_message(data.message.chat.id, 'Enter the topic please')
+        
+        
+    
+    
 
 bot.infinity_polling()
 # import telebot
