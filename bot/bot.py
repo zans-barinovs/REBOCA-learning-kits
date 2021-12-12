@@ -37,18 +37,18 @@ def most_popular_kit(data):
 
 
 def show_kit(data, kit_name):
-    print(1)
-    bot.send_message(data.message.chat.id, 'Showing '+str(kit_name)+' kit:')
-    print(2)
+    bot.send_message(data.message.chat.id, 'Pleace wait for video. Sending '+str(kit_name)+' kit video:')
+    
     files_location = '..\data\learning_kits\\'+kit_name+'\\'
+    
     video_file = open(files_location+'main_topic.mp4', 'rb')
-    print(3)
     bot.send_video(chat_id=data.message.chat.id, data=video_file, supports_streaming=True)
-    print(4)
+    
     warm_up_file = open(files_location+'warm_up.txt')
-    print(5)
     warm_up_file_lines = warm_up_file.readlines()
-    print(6)
+    for i in range(len(warm_up_file_lines)):
+        a=1
+    
 
     for i in warm_up_file_lines:
         print(i)
