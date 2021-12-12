@@ -4,7 +4,7 @@ import bot_settings
 
 bot = telebot.TeleBot(bot_settings.token)
 waiting_for_users_answer = False
-user_answer = []
+user_answer = ""
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -37,15 +37,16 @@ def most_popular_kit(data):
 
     file.close()
 
-
+@bot.message_handler(commands=['show_kit'])
 def show_kit(message, kit_name):
-    bot.send_message(message.chat.id, 'Pleace wait for video. Sending ' +
+    global waiting_for_users_answer
+    bot.send_message(message.message.chat.id, 'Pleace wait for video. Sending ' +
                      str(kit_name)+' learning kit video...')
 
     files_location = '..\data\learning_kits\\'+kit_name+'\\'
 
     video_file = open(files_location+'main_topic.mp4', 'rb')
-    # bot.send_video(chat_id=data.message.chat.id, data=video_file, supports_streaming=True, timeout = None)
+    # bot.send_video(chat_id=data.message.message.chat.id, data=video_file, supports_streaming=True, timeout = None)
 
     warm_up_file = open(files_location+'warm_up.txt')
     warm_up_file_lines = warm_up_file.readlines()
@@ -53,21 +54,27 @@ def show_kit(message, kit_name):
     counter = 0
     for i in warm_up_file_lines:
         if i[:2] == "Q:":
-            quastion = bot.send_message(message.chat.id, i[2:len(i)-1], callback=extract_message)
+            quastion = bot.send_message(message.message.chat.id, i[2:len(i)-1])
+            waiting_for_users_answer = True
+            bot.register_next_step_handler(message=quastion, callback=extract_message)
 
-            # bot.register_next_step_handler(message=quastion, callback=extract_message)
+            while waiting_for_users_answer:
+                pass
+            
             warm_up_file_lines = warm_up_file_lines[0:counter+1] + [
                 user_answer] + warm_up_file_lines[counter+1:len(warm_up_file_lines)-1]
-            bot.send_message(message.chat.id, 'You answered:' +
-                             user_answer[0] + '\n. Here is what other users answered')
+            bot.send_message(message.message.chat.id, 'You answered:' +
+                             user_answer + '\n. Here is what other users answered')
         else:
-            bot.send_message(message.chat.id, i[2:len(i)-1])
+            bot.send_message(message.message.chat.id, i[2:len(i)-1])
         counter += 1
 
 
 def extract_message(message):
-    pass
-
+    global user_answer
+    global waiting_for_users_answer
+    user_answer = message.text
+    waiting_for_users_answer = False
 
 @bot.callback_query_handler(func=lambda message: True)
 def buttons_callbacks(message):
