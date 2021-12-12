@@ -6,6 +6,7 @@ bot = telebot.TeleBot(bot_settings.token)
 waiting_for_users_answer = False
 user_answer = ""
 
+
 @bot.message_handler(commands=['start'])
 def start(message):
     getting_kit_way = telebot.types.InlineKeyboardMarkup(row_width=1)
@@ -37,6 +38,7 @@ def most_popular_kit(data):
 
     file.close()
 
+
 @bot.message_handler(commands=['show_kit'])
 def show_kit(message, kit_name):
     global waiting_for_users_answer
@@ -56,18 +58,25 @@ def show_kit(message, kit_name):
         if i[:2] == "Q:":
             quastion = bot.send_message(message.message.chat.id, i[2:len(i)-1])
             waiting_for_users_answer = True
-            bot.register_next_step_handler(message=quastion, callback=extract_message)
+            bot.register_next_step_handler(
+                message=quastion, callback=extract_message)
 
             while waiting_for_users_answer:
                 pass
-            
+
             warm_up_file_lines = warm_up_file_lines[0:counter+1] + [
                 user_answer] + warm_up_file_lines[counter+1:len(warm_up_file_lines)-1]
-            bot.send_message(message.message.chat.id, 'You answered:' +
-                             user_answer + '\n. Here is what other users answered')
+            bot.send_message(message.message.chat.id, 'You answered: ' +
+                             user_answer + '.\nHere is what other users answered:')
         else:
             bot.send_message(message.message.chat.id, i[2:len(i)-1])
         counter += 1
+
+    artwork_file = open(files_location+'artwork.jpg', 'rb')
+    bot.send_photo(message.message.chat.id, artwork_file)
+
+    text_file = open(files_location+'text.txt', 'rb')
+    bot.send_message(message.message.chat.id, str(text_file))
 
 
 def extract_message(message):
@@ -75,6 +84,7 @@ def extract_message(message):
     global waiting_for_users_answer
     user_answer = message.text
     waiting_for_users_answer = False
+
 
 @bot.callback_query_handler(func=lambda message: True)
 def buttons_callbacks(message):
@@ -90,7 +100,7 @@ def buttons_callbacks(message):
     elif message.data[:7] == "kitname":
         print("in kitname:"+message.data[7:len(message.data)-1])
         show_kit(message, message.data[7:len(message.data)-1])
-    elif waiting_for_users_answer == True and message.data !="" and message.data != None:
+    elif waiting_for_users_answer == True and message.data != "" and message.data != None:
         print(45678)
         user_answer = message.data()
         waiting_for_users_answer = False
