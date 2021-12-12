@@ -34,15 +34,25 @@ def most_popular_kit(data):
                      reply_markup=most_popular_kits)
 
     file.close()
-    
+
+
 def show_kit(data, kit_name):
-    bot.send_message(data.chat.id, 'Showing '+kit_name+' kit:')
-    files_location = "..\data\learning_kits\\"+kit_name+"\\"
-    
-    bot.send_video(chat_id=data.message.chat_id, video=open(files_location+'Main topic.mp4', 'rb'), supports_streaming=True)
-    
-    
-    
+    print(1)
+    bot.send_message(data.message.chat.id, 'Showing '+str(kit_name)+' kit:')
+    print(2)
+    files_location = '..\data\learning_kits\\'+kit_name+'\\'
+    video_file = open(files_location+'main_topic.mp4', 'rb')
+    print(3)
+    bot.send_video(chat_id=data.message.chat.id, data=video_file, supports_streaming=True)
+    print(4)
+    warm_up_file = open(files_location+'warm_up.txt')
+    print(5)
+    warm_up_file_lines = warm_up_file.readlines()
+    print(6)
+
+    for i in warm_up_file_lines:
+        print(i)
+    print(7)
 
 
 @bot.callback_query_handler(func=lambda data: True)
@@ -51,8 +61,9 @@ def buttons_callbacks(data):
         most_popular_kit(data)
     elif data.data == "search_kit":
         bot.send_message(data.message.chat.id, 'Enter the topic please')
-    elif data.data[:6] == "kitname":
-        show_kit(data, data.data[7:])
+    elif data.data[:7] == "kitname":
+        print("in kitname:"+data.data[7:len(data.data)-1])
+        show_kit(data, data.data[7:len(data.data)-1])
 
 
 bot.infinity_polling()
