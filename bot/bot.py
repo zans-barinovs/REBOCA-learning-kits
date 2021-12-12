@@ -19,37 +19,30 @@ def start(message):
                      reply_markup=getting_kit_way)
 
 
-def get_line_count(file): #SOMEHOW DOESNT FUCKING WORK
-    line_count = 0
-    for line in file:
-        if line != "\n":
-            line_count += 1
-
-    return line_count
-
-
 def most_popular_kit(data):
     file = open("..\data\learning_kits\most_popular_learning_kits.txt")
-    
     file_lines = file.readlines()
 
     most_popular_kits = telebot.types.InlineKeyboardMarkup()
-    print(get_line_count(file))
-    for i in range(2): #NEED TO CHAINGE
+    for i in range(len(file_lines)):
         one_kit = str(file_lines[i])
-        print(one_kit)
-        tmp = telebot.types.InlineKeyboardButton(
-            one_kit, callback_data=str("kitname" + one_kit))
-        print("1")
-        most_popular_kits.add(tmp)
-        print("1")
+        most_popular_kits.add(telebot.types.InlineKeyboardButton(
+            one_kit, callback_data=str("kitname" + one_kit)))
 
-    print("2")
-    bot.send_message(data.message.chat.id, 'Choose one for you',
+    bot.send_message(data.message.chat.id,
+                     'Choose one for you',
                      reply_markup=most_popular_kits)
-    print("3")
 
     file.close()
+    
+def show_kit(data, kit_name):
+    bot.send_message(data.chat.id, 'Showing '+kit_name+' kit:')
+    files_location = "..\data\learning_kits\\"+kit_name+"\\"
+    
+    bot.send_video(chat_id=data.message.chat_id, video=open(files_location+'Main topic.mp4', 'rb'), supports_streaming=True)
+    
+    
+    
 
 
 @bot.callback_query_handler(func=lambda data: True)
@@ -58,6 +51,8 @@ def buttons_callbacks(data):
         most_popular_kit(data)
     elif data.data == "search_kit":
         bot.send_message(data.message.chat.id, 'Enter the topic please')
+    elif data.data[:6] == "kitname":
+        show_kit(data, data.data[7:])
 
 
 bot.infinity_polling()
