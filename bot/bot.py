@@ -1,8 +1,10 @@
 import telebot
+from telebot.types import Message
 import bot_settings
 
 bot = telebot.TeleBot(bot_settings.token)
-
+waiting_for_users_answer = False
+user_answer = []
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -36,34 +38,57 @@ def most_popular_kit(data):
     file.close()
 
 
-def show_kit(data, kit_name):
-    bot.send_message(data.message.chat.id, 'Pleace wait for video. Sending '+str(kit_name)+' kit video:')
-    
+def show_kit(message, kit_name):
+    bot.send_message(message.chat.id, 'Pleace wait for video. Sending ' +
+                     str(kit_name)+' learning kit video...')
+
     files_location = '..\data\learning_kits\\'+kit_name+'\\'
-    
+
     video_file = open(files_location+'main_topic.mp4', 'rb')
-    bot.send_video(chat_id=data.message.chat.id, data=video_file, supports_streaming=True)
-    
+    # bot.send_video(chat_id=data.message.chat.id, data=video_file, supports_streaming=True, timeout = None)
+
     warm_up_file = open(files_location+'warm_up.txt')
     warm_up_file_lines = warm_up_file.readlines()
-    for i in range(len(warm_up_file_lines)):
-        a=1
-    
 
+    counter = 0
     for i in warm_up_file_lines:
-        print(i)
-    print(7)
+        if i[:2] == "Q:":
+            quastion = bot.send_message(message.chat.id, i[2:len(i)-1], callback=extract_message)
+
+            # bot.register_next_step_handler(message=quastion, callback=extract_message)
+            warm_up_file_lines = warm_up_file_lines[0:counter+1] + [
+                user_answer] + warm_up_file_lines[counter+1:len(warm_up_file_lines)-1]
+            bot.send_message(message.chat.id, 'You answered:' +
+                             user_answer[0] + '\n. Here is what other users answered')
+        else:
+            bot.send_message(message.chat.id, i[2:len(i)-1])
+        counter += 1
 
 
-@bot.callback_query_handler(func=lambda data: True)
-def buttons_callbacks(data):
-    if data.data == 'most_popular_kit':
-        most_popular_kit(data)
-    elif data.data == "search_kit":
-        bot.send_message(data.message.chat.id, 'Enter the topic please')
-    elif data.data[:7] == "kitname":
-        print("in kitname:"+data.data[7:len(data.data)-1])
-        show_kit(data, data.data[7:len(data.data)-1])
+def extract_message(message):
+    pass
+
+
+@bot.callback_query_handler(func=lambda message: True)
+def buttons_callbacks(message):
+    global user_answer
+    global waiting_for_users_answer
+    print(1)
+    if message.data == 'most_popular_kit':
+        print('most_popular_kit')
+        most_popular_kit(message)
+    elif message.data == "search_kit":
+        print()
+        bot.send_message(message.message.chat.id, 'Enter the topic please')
+    elif message.data[:7] == "kitname":
+        print("in kitname:"+message.data[7:len(message.data)-1])
+        show_kit(message, message.data[7:len(message.data)-1])
+    elif waiting_for_users_answer == True and message.data !="" and message.data != None:
+        print(45678)
+        user_answer = message.data()
+        waiting_for_users_answer = False
+    elif message.data == 'sam':
+        print("sana")
 
 
 bot.infinity_polling()
